@@ -1,17 +1,16 @@
-function(){/*
 <!DOCTYPE html>
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>D92A Hotmelt HMI</title>
-<script src="https://cdn.tailwindcss.com"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <script>
 tailwind.config={theme:{extend:{fontFamily:{display:['Outfit','sans-serif'],mono:['JetBrains Mono','monospace']},colors:{hm:{bg:'#08080c',card:'#0f0f16',surface:'#141420',border:'#1a1a28',muted:'#5a5a72',text:'#e4e4ed',amber:'#f59e0b',green:'#10b981',red:'#ef4444',sky:'#38bdf8'}}}}}
-<\/script>
+</script>
 <style>
 *{box-sizing:border-box}body{background:#08080c;font-family:'Outfit',sans-serif;color:#e4e4ed;margin:0}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:#0f0f16}::-webkit-scrollbar-thumb{background:#2a2a3a;border-radius:3px}
@@ -33,117 +32,436 @@ input[type="date"],input[type="number"],input[type="time"],input[type="text"],se
 .hr{background:rgba(245,158,11,.08)!important;transition:background 1.5s ease}
 .bd{opacity:.5;pointer-events:none}
 .setup-card{max-width:520px;margin:0 auto}
-<\/style>
-<\/head>
+</style>
+</head>
 <body class="min-h-screen bg-noise">
 <div class="fixed top-0 right-0 w-[500px] h-[500px] bg-hm-amber/[.03] rounded-full blur-3xl pointer-events-none"></div>
 <div class="fixed bottom-0 left-0 w-80 h-80 bg-hm-green/[.02] rounded-full blur-3xl pointer-events-none"></div>
-<div id="ldOv" class="fixed inset-0 z-[200] bg-hm-bg flex items-center justify-center"><div class="text-center"><div class="w-10 h-10 border-2 border-hm-amber border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><div class="text-hm-muted text-sm" id="ldTx">Memuatkan...</div></div></div>
+
+<!-- Loading -->
+<div id="ldOv" class="fixed inset-0 z-[200] bg-hm-bg flex items-center justify-center">
+  <div class="text-center"><div class="w-10 h-10 border-2 border-hm-amber border-t-transparent rounded-full animate-spin mx-auto mb-4"></div><div class="text-hm-muted text-sm" id="ldTx">Memuatkan...</div></div>
+</div>
+
+<!-- Toast -->
 <div class="tc" id="tC"></div>
 
+<!-- ============ SETUP SCREEN ============ -->
 <div id="setupScreen" class="hidden min-h-screen flex items-center justify-center px-4 py-8">
-<div class="setup-card bg-hm-card border border-hm-border rounded-2xl p-8">
-<div class="flex items-center gap-3 mb-6"><div class="w-10 h-10 rounded-xl bg-gradient-to-br from-hm-amber to-orange-600 flex items-center justify-center shadow-lg shadow-hm-amber/20"><i class="fas fa-fire text-white"></i></div><div><div class="font-display font-800 text-lg">D92A HOTMELT HMI</div><div class="text-[10px] text-hm-muted tracking-[.18em] uppercase">Setup — Sambung ke Spreadsheet</div></div></div>
-<div class="bg-hm-amber/5 border border-hm-amber/20 rounded-lg p-3 mb-5 text-[11px] text-hm-amber leading-relaxed"><i class="fas fa-info-circle mr-1"></i>Masukkan URL Web App dari Google Apps Script. URL ni diperoleh selepas deploy Code.gs.</div>
-<label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Google Script Web App URL</label>
-<input type="text" id="setupUrl" placeholder="https://script.google.com/macros/s/xxxxx/exec" class="w-full bg-hm-surface border border-hm-border rounded-lg px-4 py-3 text-sm font-mono focus:outline-none focus:border-hm-amber/40 mb-4">
-<button onclick="doSetup()" id="setupBtn" class="w-full py-3 rounded-lg bg-gradient-to-r from-hm-amber to-orange-500 text-black font-700 text-sm hover:brightness-110 transition-all"><i class="fas fa-plug mr-2"></i>SAMBUNG</button>
-<div id="setupErr" class="hidden mt-3 text-[11px] text-hm-red bg-hm-red/10 border border-hm-red/20 rounded-lg p-3"></div>
-</div></div>
+  <div class="setup-card bg-hm-card border border-hm-border rounded-2xl p-8">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-hm-amber to-orange-600 flex items-center justify-center shadow-lg shadow-hm-amber/20"><i class="fas fa-fire text-white"></i></div>
+      <div><div class="font-display font-800 text-lg">D92A HOTMELT HMI</div><div class="text-[10px] text-hm-muted tracking-[.18em] uppercase">Setup — Sambung ke Spreadsheet</div></div>
+    </div>
+    <div class="bg-hm-amber/5 border border-hm-amber/20 rounded-lg p-3 mb-5 text-[11px] text-hm-amber leading-relaxed">
+      <i class="fas fa-info-circle mr-1"></i>
+      Masukkan URL Web App dari Google Apps Script. URL ni diperoleh selepas deploy Code.gs (lihat README).
+    </div>
+    <label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Google Script Web App URL</label>
+    <input type="text" id="setupUrl" placeholder="https://script.google.com/macros/s/xxxxx/exec" class="w-full bg-hm-surface border border-hm-border rounded-lg px-4 py-3 text-sm font-mono focus:outline-none focus:border-hm-amber/40 mb-4">
+    <button onclick="doSetup()" id="setupBtn" class="w-full py-3 rounded-lg bg-gradient-to-r from-hm-amber to-orange-500 text-black font-700 text-sm hover:brightness-110 transition-all">
+      <i class="fas fa-plug mr-2"></i>SAMBUNG
+    </button>
+    <div id="setupErr" class="hidden mt-3 text-[11px] text-hm-red bg-hm-red/10 border border-hm-red/20 rounded-lg p-3"></div>
+  </div>
+</div>
 
+<!-- ============ MAIN APP ============ -->
 <div id="mainApp" class="hidden">
+
 <header class="sticky top-0 z-50 border-b border-hm-border bg-hm-bg/92 backdrop-blur-xl">
-<div class="max-w-7xl mx-auto px-4 sm:px-6"><div class="flex items-center justify-between h-14">
-<div class="flex items-center gap-3"><div class="w-7 h-7 rounded-lg bg-gradient-to-br from-hm-amber to-orange-600 flex items-center justify-center shadow-lg shadow-hm-amber/20"><i class="fas fa-fire text-white text-[11px]"></i></div><div class="leading-tight"><div class="font-display font-800 text-[13px] tracking-wide">D92A HOTMELT</div><div class="text-[9px] text-hm-muted tracking-[.18em] uppercase">Door Mirror — Main Assembly</div></div></div>
-<nav class="flex items-center gap-0.5"><button onclick="swTab('input')" id="tBi" class="tab-active px-4 py-4 text-[13px] font-600 tracking-wide transition-all">USAGE INPUT</button><button onclick="swTab('history')" id="tBh" class="tab-inactive px-4 py-4 text-[13px] font-600 tracking-wide transition-all">HISTORY</button><button onclick="swTab('report')" id="tBr" class="tab-inactive px-4 py-4 text-[13px] font-600 tracking-wide transition-all">REPORT</button></nav>
-<div class="flex items-center gap-2"><button onclick="opSet()" class="w-8 h-8 rounded-lg border border-hm-border hover:border-hm-muted text-hm-muted hover:text-hm-text transition-all flex items-center justify-center" title="Settings"><i class="fas fa-gear text-xs"></i></button><button onclick="disconnect()" class="w-8 h-8 rounded-lg border border-hm-border hover:border-hm-red/50 text-hm-muted hover:text-hm-red transition-all flex items-center justify-center" title="Putus"><i class="fas fa-link-slash text-xs"></i></button></div>
-</div></div></header>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-14">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-hm-amber to-orange-600 flex items-center justify-center shadow-lg shadow-hm-amber/20"><i class="fas fa-fire text-white text-[11px]"></i></div>
+        <div class="leading-tight"><div class="font-display font-800 text-[13px] tracking-wide">D92A HOTMELT</div><div class="text-[9px] text-hm-muted tracking-[.18em] uppercase">Door Mirror — Main Assembly</div></div>
+      </div>
+      <nav class="flex items-center gap-0.5">
+        <button onclick="swTab('input')" id="tBi" class="tab-active px-4 py-4 text-[13px] font-600 tracking-wide transition-all">USAGE INPUT</button>
+        <button onclick="swTab('history')" id="tBh" class="tab-inactive px-4 py-4 text-[13px] font-600 tracking-wide transition-all">HISTORY</button>
+        <button onclick="swTab('report')" id="tBr" class="tab-inactive px-4 py-4 text-[13px] font-600 tracking-wide transition-all">REPORT</button>
+      </nav>
+      <div class="flex items-center gap-2">
+        <button onclick="opSet()" class="w-8 h-8 rounded-lg border border-hm-border hover:border-hm-muted text-hm-muted hover:text-hm-text transition-all flex items-center justify-center" title="Master Settings"><i class="fas fa-gear text-xs"></i></button>
+        <button onclick="disconnect()" class="w-8 h-8 rounded-lg border border-hm-border hover:border-hm-red/50 text-hm-muted hover:text-hm-red transition-all flex items-center justify-center" title="Putus sambungan"><i class="fas fa-link-slash text-xs"></i></button>
+      </div>
+    </div>
+  </div>
+</header>
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 py-5">
 
-<section id="p-input" class="slide-up">
-<div class="flex items-center gap-2 mb-5"><span class="w-[7px] h-[7px] rounded-full bg-hm-green glow-green pulse-live"></span><span class="text-hm-green text-[11px] font-mono font-600 tracking-wider">LIVE</span><span class="text-hm-border">|</span><span class="text-hm-muted text-[11px] tracking-wide">HOTMELT CONSUMPTION MONITOR</span></div>
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
-<div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Operator</label><select id="iOp" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-600 focus:outline-none focus:border-hm-amber/40"></select></div>
-<div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Date</label><input type="date" id="iDt" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div>
-<div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Time</label><input type="time" id="iTm" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div>
-<div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Shift</label><select id="iSh" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-600 focus:outline-none focus:border-hm-amber/40"><option>Shift A</option><option>Shift B</option><option>Shift C</option></select></div>
-<div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Changeover?</label><select id="iCo" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-600 focus:outline-none focus:border-hm-amber/40"><option>NO</option><option>YES</option></select></div>
+  <!-- USAGE INPUT -->
+  <section id="p-input" class="slide-up">
+    <div class="flex items-center gap-2 mb-5">
+      <span class="w-[7px] h-[7px] rounded-full bg-hm-green glow-green pulse-live"></span>
+      <span class="text-hm-green text-[11px] font-mono font-600 tracking-wider">LIVE</span>
+      <span class="text-hm-border">|</span>
+      <span class="text-hm-muted text-[11px] tracking-wide">HOTMELT CONSUMPTION MONITOR</span>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+      <div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Operator</label><select id="iOp" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-600 focus:outline-none focus:border-hm-amber/40"></select></div>
+      <div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Date</label><input type="date" id="iDt" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div>
+      <div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Time</label><input type="time" id="iTm" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div>
+      <div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Shift</label><select id="iSh" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-600 focus:outline-none focus:border-hm-amber/40"><option>Shift A</option><option>Shift B</option><option>Shift C</option></select></div>
+      <div class="bg-hm-card border border-hm-border rounded-xl p-3.5"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1.5">Changeover?</label><select id="iCo" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-600 focus:outline-none focus:border-hm-amber/40"><option>NO</option><option>YES</option></select></div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
+      <div class="bg-hm-card border border-hm-border rounded-xl p-4">
+        <label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1">Today's Production Plan (pcs)</label>
+        <div class="text-[10px] text-hm-muted mb-2.5">Plan Hotmelt = plan x <span id="dW1" class="text-hm-amber font-mono font-600">48</span>g</div>
+        <input type="number" id="iPl" value="8000" min="0" class="ni text-xl font-700 text-hm-amber" placeholder="0" oninput="upCal()">
+        <div class="mt-2 text-[11px] font-mono"><span class="text-hm-muted">Plan Weight:</span> <span id="dPW" class="text-hm-green font-600">384,000 g</span> <span class="text-hm-muted">/</span> <span id="dPK" class="text-hm-green font-600">384.0 kg</span></div>
+      </div>
+      <div class="bg-hm-card border border-hm-border rounded-xl p-4">
+        <label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1">Actual Running (pcs)</label>
+        <div class="text-[10px] text-hm-muted mb-2.5">Actual Weight = actual x <span id="dW2" class="text-hm-amber font-mono font-600">48</span>g</div>
+        <input type="number" id="iAc" value="" min="0" class="ni text-xl font-700 text-hm-sky" placeholder="0" oninput="upCal()">
+        <div class="mt-2 text-[11px] font-mono"><span class="text-hm-muted">Actual Weight:</span> <span id="dAW" class="text-hm-sky font-600">0 g</span> <span class="text-hm-muted">/</span> <span id="dAK" class="text-hm-sky font-600">0.0 kg</span></div>
+      </div>
+    </div>
+    <div class="mb-1">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600">Event Counters — Key-in Tally Count &amp; Weight</h2>
+        <button onclick="rstEW()" class="text-[10px] text-hm-amber/60 hover:text-hm-amber transition-colors"><i class="fas fa-rotate-left mr-1"></i>Reset Weights ke Default</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="cG"></div>
+    </div>
+    <div class="mt-5 bg-hm-card border border-hm-amber/20 rounded-xl p-5 glow-amber">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <div class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-1">Total Hotmelt Consumption</div>
+          <div class="flex items-baseline gap-2.5">
+            <span id="dTG" class="text-3xl font-mono font-700 text-hm-amber">0</span><span class="text-hm-muted text-sm">g</span>
+            <span class="text-hm-border text-lg">/</span>
+            <span id="dTK" class="text-xl font-mono font-600 text-hm-text">0</span><span class="text-hm-muted text-sm">kg</span>
+          </div>
+          <div class="text-[10px] text-hm-muted mt-1 font-mono">Plan <span id="dSP" class="text-hm-green">384,000g</span> + Events <span id="dSE" class="text-hm-amber">700g</span><span id="dSAW" class="hidden"> | Actual <span id="dSA" class="text-hm-sky">0g</span> + Events <span id="dSE2" class="text-hm-amber">700g</span></span></div>
+        </div>
+        <div class="flex gap-2.5">
+          <button onclick="rstForm()" class="px-4 py-2.5 rounded-lg border border-hm-border text-hm-muted hover:text-hm-text hover:border-hm-muted text-sm font-600 transition-all cbtn"><i class="fas fa-rotate-left mr-1.5"></i>RESET</button>
+          <button id="bSv" onclick="svLog()" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-hm-amber to-orange-500 text-black font-700 text-sm hover:brightness-110 transition-all cbtn shadow-lg shadow-hm-amber/20"><i class="fas fa-floppy-disk mr-1.5"></i>SAVE → LOG</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="p-history" class="hidden">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-5">
+      <div class="relative flex-1 w-full"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-hm-muted text-xs"></i><input type="text" id="hSrch" placeholder="Cari operator atau tarikh..." oninput="rHist()" class="w-full bg-hm-card border border-hm-border rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-hm-amber/40"></div>
+      <select id="hSF" onchange="rHist()" class="bg-hm-card border border-hm-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-hm-amber/40"><option value="">Semua Shift</option><option>Shift A</option><option>Shift B</option><option>Shift C</option></select>
+      <select id="hCF" onchange="rHist()" class="bg-hm-card border border-hm-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-hm-amber/40"><option value="">Semua C/O</option><option>NO</option><option>YES</option></select>
+    </div>
+    <div id="hG" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    <div id="hE" class="hidden text-center py-20"><i class="fas fa-inbox text-4xl text-hm-border mb-4 block"></i><p class="text-hm-muted text-sm">Tiada rekod ditemui</p></div>
+  </section>
+
+  <!-- REPORT -->
+  <section id="p-report" class="hidden">
+    <div class="bg-hm-card border border-hm-border rounded-xl p-4 mb-5">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <span class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 whitespace-nowrap">Trend Period</span>
+        <div class="flex items-center gap-2 flex-wrap"><input type="date" id="rDF" onchange="rRpt()" class="bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"><span class="text-hm-muted text-sm">ke</span><input type="date" id="rDT" onchange="rRpt()" class="bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div>
+        <button onclick="clrDF()" class="text-[11px] text-hm-amber hover:underline ml-auto">Set Semula</button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5" id="rSt"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
+      <div class="bg-hm-card border border-hm-border rounded-xl p-5"><h3 class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-4">Hotmelt by Event Type (kg)</h3><div style="height:280px"><canvas id="cE"></canvas></div></div>
+      <div class="bg-hm-card border border-hm-border rounded-xl p-5"><h3 class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-4">Daily Total (kg)</h3><div style="height:280px"><canvas id="cD"></canvas></div></div>
+    </div>
+    <div class="bg-hm-card border border-hm-border rounded-xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-hm-border flex items-center justify-between"><h3 class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600">Data Table</h3><span id="tCn" class="text-[11px] text-hm-muted font-mono"></span></div>
+      <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-[9px] text-hm-muted uppercase tracking-[.12em] border-b border-hm-border"><th class="px-3 py-2.5 text-left font-600">Date</th><th class="px-3 py-2.5 text-left font-600">Operator</th><th class="px-3 py-2.5 text-left font-600">Shift</th><th class="px-3 py-2.5 text-center font-600">C/O</th><th class="px-3 py-2.5 text-right font-600">Plan</th><th class="px-3 py-2.5 text-right font-600">Actual</th><th class="px-3 py-2.5 text-center font-600">b</th><th class="px-3 py-2.5 text-center font-600">c</th><th class="px-3 py-2.5 text-center font-600">d</th><th class="px-3 py-2.5 text-center font-600">e</th><th class="px-3 py-2.5 text-center font-600">f</th><th class="px-3 py-2.5 text-center font-600">g</th><th class="px-3 py-2.5 text-right font-600">Total g</th><th class="px-3 py-2.5 text-right font-600">Total kg</th></tr></thead><tbody id="rTB" class="font-mono text-[11px]"></tbody></table></div>
+    </div>
+  </section>
+</main>
 </div>
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-<div class="bg-hm-card border border-hm-border rounded-xl p-4"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1">Today's Production Plan (pcs)</label><div class="text-[10px] text-hm-muted mb-2.5">Plan Hotmelt = plan x <span id="dW1" class="text-hm-amber font-mono font-600">48</span>g</div><input type="number" id="iPl" value="8000" min="0" class="ni text-xl font-700 text-hm-amber" placeholder="0" oninput="upCal()"><div class="mt-2 text-[11px] font-mono"><span class="text-hm-muted">Plan Weight:</span> <span id="dPW" class="text-hm-green font-600">384,000 g</span> <span class="text-hm-muted">/</span> <span id="dPK" class="text-hm-green font-600">384.0 kg</span></div></div>
-<div class="bg-hm-card border border-hm-border rounded-xl p-4"><label class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 block mb-1">Actual Running (pcs)</label><div class="text-[10px] text-hm-muted mb-2.5">Actual Weight = actual x <span id="dW2" class="text-hm-amber font-mono font-600">48</span>g</div><input type="number" id="iAc" value="" min="0" class="ni text-xl font-700 text-hm-sky" placeholder="0" oninput="upCal()"><div class="mt-2 text-[11px] font-mono"><span class="text-hm-muted">Actual Weight:</span> <span id="dAW" class="text-hm-sky font-600">0 g</span> <span class="text-hm-muted">/</span> <span id="dAK" class="text-hm-sky font-600">0.0 kg</span></div></div>
-</div>
-<div class="mb-1"><div class="flex items-center justify-between mb-3"><h2 class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600">Event Counters — Key-in Tally Count &amp; Weight</h2><button onclick="rstEW()" class="text-[10px] text-hm-amber/60 hover:text-hm-amber transition-colors"><i class="fas fa-rotate-left mr-1"></i>Reset Weights ke Default</button></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="cG"></div></div>
-<div class="mt-5 bg-hm-card border border-hm-amber/20 rounded-xl p-5 glow-amber"><div class="flex flex-col sm:flex-row items-center justify-between gap-4"><div><div class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-1">Total Hotmelt Consumption</div><div class="flex items-baseline gap-2.5"><span id="dTG" class="text-3xl font-mono font-700 text-hm-amber">0</span><span class="text-hm-muted text-sm">g</span><span class="text-hm-border text-lg">/</span><span id="dTK" class="text-xl font-mono font-600 text-hm-text">0</span><span class="text-hm-muted text-sm">kg</span></div><div class="text-[10px] text-hm-muted mt-1 font-mono">Plan <span id="dSP" class="text-hm-green">384,000g</span> + Events <span id="dSE" class="text-hm-amber">700g</span><span id="dSAW" class="hidden"> | Actual <span id="dSA" class="text-hm-sky">0g</span> + Events <span id="dSE2" class="text-hm-amber">700g</span></span></div></div><div class="flex gap-2.5"><button onclick="rstForm()" class="px-4 py-2.5 rounded-lg border border-hm-border text-hm-muted hover:text-hm-text hover:border-hm-muted text-sm font-600 transition-all cbtn"><i class="fas fa-rotate-left mr-1.5"></i>RESET</button><button id="bSv" onclick="svLog()" class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-hm-amber to-orange-500 text-black font-700 text-sm hover:brightness-110 transition-all cbtn shadow-lg shadow-hm-amber/20"><i class="fas fa-floppy-disk mr-1.5"></i>SAVE → LOG</button></div></div></div>
-</section>
 
-<section id="p-history" class="hidden">
-<div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-5"><div class="relative flex-1 w-full"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-hm-muted text-xs"></i><input type="text" id="hSrch" placeholder="Cari operator atau tarikh..." oninput="rHist()" class="w-full bg-hm-card border border-hm-border rounded-lg pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-hm-amber/40"></div><select id="hSF" onchange="rHist()" class="bg-hm-card border border-hm-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-hm-amber/40"><option value="">Semua Shift</option><option>Shift A</option><option>Shift B</option><option>Shift C</option></select><select id="hCF" onchange="rHist()" class="bg-hm-card border border-hm-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-hm-amber/40"><option value="">Semua C/O</option><option>NO</option><option>YES</option></select></div>
-<div id="hG" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-<div id="hE" class="hidden text-center py-20"><i class="fas fa-inbox text-4xl text-hm-border mb-4 block"></i><p class="text-hm-muted text-sm">Tiada rekod ditemui</p></div>
-</section>
-
-<section id="p-report" class="hidden">
-<div class="bg-hm-card border border-hm-border rounded-xl p-4 mb-5"><div class="flex flex-col sm:flex-row items-start sm:items-center gap-3"><span class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 whitespace-nowrap">Trend Period</span><div class="flex items-center gap-2 flex-wrap"><input type="date" id="rDF" onchange="rRpt()" class="bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"><span class="text-hm-muted text-sm">ke</span><input type="date" id="rDT" onchange="rRpt()" class="bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div><button onclick="clrDF()" class="text-[11px] text-hm-amber hover:underline ml-auto">Set Semula</button></div></div>
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5" id="rSt"></div>
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5"><div class="bg-hm-card border border-hm-border rounded-xl p-5"><h3 class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-4">Hotmelt by Event Type (kg)</h3><div style="height:280px"><canvas id="cE"></canvas></div></div><div class="bg-hm-card border border-hm-border rounded-xl p-5"><h3 class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-4">Daily Total (kg)</h3><div style="height:280px"><canvas id="cD"></canvas></div></div></div>
-<div class="bg-hm-card border border-hm-border rounded-xl overflow-hidden"><div class="px-5 py-3.5 border-b border-hm-border flex items-center justify-between"><h3 class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600">Data Table</h3><span id="tCn" class="text-[11px] text-hm-muted font-mono"></span></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="text-[9px] text-hm-muted uppercase tracking-[.12em] border-b border-hm-border"><th class="px-3 py-2.5 text-left font-600">Date</th><th class="px-3 py-2.5 text-left font-600">Operator</th><th class="px-3 py-2.5 text-left font-600">Shift</th><th class="px-3 py-2.5 text-center font-600">C/O</th><th class="px-3 py-2.5 text-right font-600">Plan</th><th class="px-3 py-2.5 text-right font-600">Actual</th><th class="px-3 py-2.5 text-center font-600">b</th><th class="px-3 py-2.5 text-center font-600">c</th><th class="px-3 py-2.5 text-center font-600">d</th><th class="px-3 py-2.5 text-center font-600">e</th><th class="px-3 py-2.5 text-center font-600">f</th><th class="px-3 py-2.5 text-center font-600">g</th><th class="px-3 py-2.5 text-right font-600">Total g</th><th class="px-3 py-2.5 text-right font-600">Total kg</th></tr></thead><tbody id="rTB" class="font-mono text-[11px]"></tbody></table></div></div>
-</section>
-</main></div>
-
+<!-- VIEW MODAL -->
 <div id="mV" class="fixed inset-0 z-[100] hidden items-center justify-center mo"><div class="bg-hm-card border border-hm-border rounded-2xl w-full max-w-lg mx-4 slide-up overflow-hidden"><div class="px-6 py-3.5 border-b border-hm-border flex items-center justify-between"><h3 class="font-display font-700 text-sm tracking-wide">DETAIL REKOD</h3><button onclick="clM('mV')" class="w-7 h-7 rounded-lg hover:bg-hm-surface text-hm-muted hover:text-hm-text transition-colors flex items-center justify-center"><i class="fas fa-xmark text-sm"></i></button></div><div id="mVC" class="p-6 max-h-[70vh] overflow-y-auto"></div><div class="px-6 py-3.5 border-t border-hm-border flex justify-end gap-2.5"><button onclick="vGtR()" class="px-4 py-2 rounded-lg border border-hm-amber/30 text-hm-amber text-[11px] font-600 hover:bg-hm-amber/10 transition-colors"><i class="fas fa-chart-line mr-1.5"></i>Buka di Report</button><button onclick="clM('mV')" class="px-4 py-2 rounded-lg bg-hm-surface text-hm-text text-[11px] font-600 hover:bg-hm-border transition-colors">Tutup</button></div></div></div>
+
+<!-- EDIT MODAL -->
 <div id="mE" class="fixed inset-0 z-[100] hidden items-center justify-center mo"><div class="bg-hm-card border border-hm-border rounded-2xl w-full max-w-lg mx-4 slide-up overflow-hidden"><div class="px-6 py-3.5 border-b border-hm-border flex items-center justify-between"><h3 class="font-display font-700 text-sm tracking-wide">EDIT REKOD</h3><button onclick="clM('mE')" class="w-7 h-7 rounded-lg hover:bg-hm-surface text-hm-muted hover:text-hm-text transition-colors flex items-center justify-center"><i class="fas fa-xmark text-sm"></i></button></div><div id="mEC" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto"></div><div class="px-6 py-3.5 border-t border-hm-border flex justify-end gap-2.5"><button onclick="clM('mE')" class="px-4 py-2 rounded-lg border border-hm-border text-hm-muted text-[11px] font-600 hover:text-hm-text transition-colors">Batal</button><button id="bSE" onclick="svEd()" class="px-5 py-2 rounded-lg bg-hm-amber text-black font-700 text-[11px] hover:brightness-110 transition-all">Simpan</button></div></div></div>
+
+<!-- SETTINGS MODAL -->
 <div id="mS" class="fixed inset-0 z-[100] hidden items-center justify-center mo"><div class="bg-hm-card border border-hm-border rounded-2xl w-full max-w-2xl mx-4 slide-up overflow-hidden"><div class="px-6 py-3.5 border-b border-hm-border flex items-center justify-between"><h3 class="font-display font-700 text-sm tracking-wide"><i class="fas fa-gear mr-2 text-hm-amber"></i>MASTER SETTINGS</h3><button onclick="clM('mS')" class="w-7 h-7 rounded-lg hover:bg-hm-surface text-hm-muted hover:text-hm-text transition-colors flex items-center justify-center"><i class="fas fa-xmark text-sm"></i></button></div><div id="mSC" class="p-6 space-y-5 max-h-[75vh] overflow-y-auto"></div><div class="px-6 py-3.5 border-t border-hm-border flex justify-end gap-2.5"><button onclick="clM('mS')" class="px-4 py-2 rounded-lg border border-hm-border text-hm-muted text-[11px] font-600 hover:text-hm-text transition-colors">Batal</button><button id="bSS" onclick="svSet()" class="px-5 py-2 rounded-lg bg-hm-amber text-black font-700 text-[11px] hover:brightness-110 transition-all">Simpan Settings</button></div></div></div>
 
 <script>
-var API_URL=localStorage.getItem('hm_api_url')||'';
-function apiGet(a){var s=API_URL.indexOf('?')===-1?'?':'&';return fetch(API_URL+s+'action='+encodeURIComponent(a)).then(function(r){return r.json()})}
-function apiPost(a,d){return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:a,data:d})}).then(function(r){return r.json()})}
-var EK=['b','c','d','e','f','g'],S={weightPerPcs:48,events:{},operators:[]},LD=[],nId=1,cVId=null,cEId=null,chE=null,chD=null;
-function calc(e){var wpp=(e.ew&&e.ew._wpp)||S.weightPerPcs,plW=e.plan*wpp,ap=e.actualPcs||0,acW=ap*wpp,ev={},evT=0;EK.forEach(function(k){var w=(e.ew&&e.ew[k]!=null)?e.ew[k]:(S.events[k]?S.events[k].weight:0);ev[k]=(e[k]||0)*w;evT+=ev[k]});var bW=ap>0?acW:plW,t=bW+evT;return{wpp:wpp,planW:plW,actualPcs:ap,actualW:acW,ev:ev,evTotal:evT,baseW:bW,total:t,totalKg:parseFloat((t/1000).toFixed(1))}}
-function fN(n){return(n||0).toLocaleString('en-MY')}
-function fDD(d){if(!d)return'\u2014';var p=d.split('-');return p[0]+' - '+p[1]+' - '+p[2]}
-function fDS(d){if(!d)return'';var dt=new Date(d+'T00:00:00');var m=['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];return dt.getDate()+' '+m[dt.getMonth()]}
-function sC(s){return s==='Shift A'?'bg-emerald-500/15 text-emerald-400 border-emerald-500/30':s==='Shift B'?'bg-amber-500/15 text-amber-400 border-amber-500/30':'bg-sky-500/15 text-sky-400 border-sky-500/30'}
-function cC(c){return c==='YES'?'bg-red-500/15 text-red-400 border-red-500/30':'bg-zinc-600/15 text-zinc-400 border-zinc-600/30'}
-function toast(m,t){t=t||'success';var c=document.getElementById('tC'),el=document.createElement('div');var ic={success:'check-circle',error:'exclamation-circle',info:'info-circle'};el.className='toast t'+t[0];el.innerHTML='<i class="fas fa-'+(ic[t]||'info-circle')+' mr-2"></i>'+m;c.appendChild(el);setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){el.remove()},300)},3200)}
-function opM(id){var m=document.getElementById(id);m.classList.remove('hidden');m.classList.add('flex')}
-function clM(id){var m=document.getElementById(id);m.classList.add('hidden');m.classList.remove('flex')}
-function bL(bid,ld){var b=document.getElementById(bid);if(!b)return;if(ld){b._o=b.innerHTML;b.innerHTML='<i class="fas fa-spinner fa-spin mr-1.5"></i>Saving...';b.classList.add('bd')}else{b.innerHTML=b._o||b.innerHTML;b.classList.remove('bd')}}
-function doSetup(){var url=document.getElementById('setupUrl').value.trim(),errEl=document.getElementById('setupErr');if(!url){errEl.textContent='Sila masukkan URL.';errEl.classList.remove('hidden');return}if(!url.startsWith('https://script.google.com')){errEl.textContent='URL mesti bermula dengan https://script.google.com';errEl.classList.remove('hidden');return}var btn=document.getElementById('setupBtn');btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i>Menyambung...';btn.classList.add('bd');errEl.classList.add('hidden');var testUrl=url+(url.indexOf('?')===-1?'?':'&')+'action=ping';fetch(testUrl).then(function(r){return r.json()}).then(function(data){if(data.status==='ok'){API_URL=url;localStorage.setItem('hm_api_url',url);loadApp()}else{throw new Error(data.error||'Respons tidak sah')}}).catch(function(e){btn.innerHTML='<i class="fas fa-plug mr-2"></i>SAMBUNG';btn.classList.remove('bd');errEl.textContent='Gagal sambung: '+e.message;errEl.classList.remove('hidden')})}
-function disconnect(){if(!confirm('Putus sambungan?'))return;localStorage.removeItem('hm_api_url');API_URL='';location.reload()}
-function swTab(n){['input','history','report'].forEach(function(t){document.getElementById('p-'+t).classList.toggle('hidden',t!==n);document.getElementById('tB'+t[0]).className=t===n?'tab-active px-4 py-4 text-[13px] font-600 tracking-wide transition-all':'tab-inactive px-4 py-4 text-[13px] font-600 tracking-wide transition-all'});if(n==='history')rHist();if(n==='report')rRpt()}
-function rCnt(){var g=document.getElementById('cG');g.innerHTML=EK.map(function(k){var ev=S.events[k]||{name:k,weight:0,defaultCount:0};return'<div class="bg-hm-card border border-hm-border rounded-xl p-4 chover"><div class="text-[9px] text-hm-muted uppercase tracking-[.12em] font-600 mb-3">'+k+' \u00b7 '+ev.name+'</div><div class="flex items-center gap-2 mb-3"><button onclick="chC(\''+k+'\',-1)" class="cbtn w-8 h-8 rounded-lg border border-hm-border hover:border-hm-amber/50 text-hm-muted hover:text-hm-amber flex items-center justify-center transition-colors"><i class="fas fa-minus text-[10px]"></i></button><span id="c-'+k+'" class="w-8 text-center text-xl font-mono font-700">'+ev.defaultCount+'</span><button onclick="chC(\''+k+'\',1)" class="cbtn w-8 h-8 rounded-lg border border-hm-border hover:border-hm-amber/50 text-hm-muted hover:text-hm-amber flex items-center justify-center transition-colors"><i class="fas fa-plus text-[10px]"></i></button></div><div class="flex items-center justify-between bg-hm-surface rounded-lg px-3 py-2"><div class="flex items-center gap-1.5"><label class="text-[9px] text-hm-muted uppercase">W(g)</label><input type="number" id="ew-'+k+'" value="'+ev.weight+'" min="0" class="wi" oninput="upCal()"></div><div class="text-right"><span id="cl-'+k+'" class="font-mono text-[12px] font-600 text-hm-text">'+fN(ev.defaultCount*ev.weight)+' g</span></div></div></div>'}).join('');upCal()}
-function chC(k,d){var el=document.getElementById('c-'+k);var v=parseInt(el.textContent)+d;if(v<0)v=0;el.textContent=v;upCal()}
-function gC(k){return parseInt(document.getElementById('c-'+k).textContent)||0}
-function gEW(k){return Math.max(0,parseInt(document.getElementById('ew-'+k).value)||0)}
-function upCal(){var wpp=S.weightPerPcs,pl=parseInt(document.getElementById('iPl').value)||0,ac=parseInt(document.getElementById('iAc').value)||0;document.getElementById('dW1').textContent=wpp;document.getElementById('dW2').textContent=wpp;var plW=pl*wpp,acW=ac*wpp;document.getElementById('dPW').textContent=fN(plW)+' g';document.getElementById('dPK').textContent=(plW/1000).toFixed(1)+' kg';document.getElementById('dAW').textContent=fN(acW)+' g';document.getElementById('dAK').textContent=(acW/1000).toFixed(1)+' kg';var evT=0;EK.forEach(function(k){var g=gC(k)*gEW(k);evT+=g;document.getElementById('cl-'+k).textContent=fN(g)+' g'});var bW=ac>0?acW:plW,tG=bW+evT;document.getElementById('dTG').textContent=fN(tG);document.getElementById('dTK').textContent=(tG/1000).toFixed(1);document.getElementById('dSP').textContent=fN(plW)+'g';document.getElementById('dSE').textContent=fN(evT)+'g';var aw=document.getElementById('dSAW');if(ac>0){aw.classList.remove('hidden');document.getElementById('dSA').textContent=fN(acW)+'g';document.getElementById('dSE2').textContent=fN(evT)+'g'}else{aw.classList.add('hidden')}}
-function rstEW(){EK.forEach(function(k){document.getElementById('ew-'+k).value=(S.events[k]||{}).weight||0});upCal();toast('Event weights reset ke default','info')}
-function rstForm(){EK.forEach(function(k){document.getElementById('c-'+k).textContent=(S.events[k]||{}).defaultCount||0;document.getElementById('ew-'+k).value=(S.events[k]||{}).weight||0});document.getElementById('iPl').value=8000;document.getElementById('iAc').value='';setNow();upCal();toast('Counter direset ke default','info')}
-function svLog(){var op=document.getElementById('iOp').value,dt=document.getElementById('iDt').value,tm=document.getElementById('iTm').value,sh=document.getElementById('iSh').value,co=document.getElementById('iCo').value,pl=parseInt(document.getElementById('iPl').value)||0,ap=parseInt(document.getElementById('iAc').value)||0;if(!op){toast('Sila pilih operator','error');return}if(!dt){toast('Sila pilih tarikh','error');return}if(pl<=0){toast('Plan mesti > 0','error');return}var ew={_wpp:S.weightPerPcs};EK.forEach(function(k){ew[k]=gEW(k)});var entry={date:dt,time:tm,operator:op,shift:sh,cover:co,plan:pl,actualPcs:ap,b:gC('b'),c:gC('c'),d:gC('d'),e:gC('e'),f:gC('f'),g:gC('g'),ew:ew};bL('bSv',true);apiPost('addLog',entry).then(function(r){bL('bSv',false);if(r.success){entry.id=r.id;LD.push(entry);nId=r.id+1;var c=calc(entry);toast('Disimpan! Total: '+fN(c.total)+'g ('+c.totalKg+' kg)','success');rstForm()}else{toast('Gagal: '+(r.error||'Unknown'),'error')}}).catch(function(e){bL('bSv',false);toast('Ralat: '+e.message,'error')})}
-function setNow(){var n=new Date();document.getElementById('iDt').value=n.toISOString().split('T')[0];document.getElementById('iTm').value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')}
-function rOpDD(){document.getElementById('iOp').innerHTML=S.operators.map(function(o){return'<option>'+o+'</option>'}).join('')}
-function rHist(){var sr=(document.getElementById('hSrch').value||'').toLowerCase(),sf=document.getElementById('hSF').value,cf=document.getElementById('hCF').value;var f=LD.filter(function(e){if(sr&&!e.operator.toLowerCase().includes(sr)&&!(e.date||'').includes(sr))return false;if(sf&&e.shift!==sf)return false;if(cf&&e.cover!==cf)return false;return true}).sort(function(a,b){return a.date!==b.date?b.date.localeCompare(a.date):b.id-a.id});var g=document.getElementById('hG'),em=document.getElementById('hE');if(!f.length){g.innerHTML='';em.classList.remove('hidden');return}em.classList.add('hidden');g.innerHTML=f.map(function(e){var c=calc(e),pd=c.actualPcs>0?'actual '+fN(c.actualPcs)+' pcs':'plan '+fN(e.plan)+' pcs';return'<div class="bg-hm-card border border-hm-border rounded-xl p-4 chover slide-up"><div class="text-[10px] text-hm-muted font-mono mb-1.5">'+fDD(e.date)+' \u00b7 '+(e.time||'--:--')+'</div><div class="flex gap-1.5 mb-2.5"><span class="text-[9px] font-600 px-1.5 py-0.5 rounded-md border '+sC(e.shift)+'">'+e.shift+'</span><span class="text-[9px] font-600 px-1.5 py-0.5 rounded-md border '+cC(e.cover)+'">C/O '+e.cover+'</span></div><div class="font-display font-800 text-xl mb-0.5 tracking-wide">'+e.operator+'</div><div class="text-[11px] text-hm-muted mb-0.5">'+pd+'</div><div class="font-mono font-700 text-lg text-hm-amber">'+c.totalKg+' kg</div><div class="font-mono text-[10px] text-hm-muted mb-3">('+fN(c.total)+' g)</div><div class="flex gap-2"><button onclick="opVM('+e.id+')" class="flex-1 py-1.5 rounded-lg border border-hm-border text-hm-text text-[11px] font-600 hover:border-hm-amber/40 hover:text-hm-amber transition-all"><i class="fas fa-eye mr-1"></i>VIEW</button><button onclick="opEM('+e.id+')" class="flex-1 py-1.5 rounded-lg border border-hm-border text-hm-text text-[11px] font-600 hover:border-hm-sky/40 hover:text-hm-sky transition-all"><i class="fas fa-pen mr-1"></i>EDIT</button></div></div>'}).join('')}
-function opVM(id){cVId=id;var e=LD.find(function(x){return x.id===id});if(!e)return;var c=calc(e),ct=document.getElementById('mVC');var ps='';if(c.actualPcs>0){ps='<div class="grid grid-cols-2 gap-3 mb-4"><div class="bg-hm-surface rounded-lg p-3"><div class="text-[9px] text-hm-muted uppercase tracking-widest mb-1">Plan (pcs)</div><div class="font-mono font-700 text-sm">'+fN(e.plan)+'</div><div class="font-mono text-[10px] text-hm-green">'+fN(c.planW)+' g</div></div><div class="bg-hm-surface rounded-lg p-3 border border-hm-sky/20"><div class="text-[9px] text-hm-sky uppercase tracking-widest mb-1">Actual Running</div><div class="font-mono font-700 text-sm text-hm-sky">'+fN(c.actualPcs)+' pcs</div><div class="font-mono text-[10px] text-hm-sky">'+fN(c.actualW)+' g</div></div></div>'}else{ps='<div class="bg-hm-surface rounded-lg p-3 mb-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest mb-1">Plan (pcs)</div><div class="font-mono font-700">'+fN(e.plan)+' pcs \u2192 <span class="text-hm-green">'+fN(c.planW)+' g</span></div></div>'}ct.innerHTML='<div class="flex items-center gap-3 mb-4"><div class="w-11 h-11 rounded-xl bg-hm-surface border border-hm-border flex items-center justify-center"><i class="fas fa-user text-hm-amber text-sm"></i></div><div><div class="font-display font-800 text-lg">'+e.operator+'</div><div class="text-[11px] text-hm-muted font-mono">'+fDD(e.date)+' \u00b7 '+(e.time||'--:--')+'</div></div></div><div class="flex gap-2 mb-4"><span class="text-[10px] font-600 px-2 py-0.5 rounded-lg border '+sC(e.shift)+'">'+e.shift+'</span><span class="text-[10px] font-600 px-2 py-0.5 rounded-lg border '+cC(e.cover)+'">C/O '+e.cover+'</span><span class="text-[10px] font-600 px-2 py-0.5 rounded-lg border bg-hm-surface border-hm-border text-hm-muted">'+c.wpp+'g/pcs</span></div>'+ps+'<div class="space-y-1.5 mb-4">'+EK.map(function(k){var w=(e.ew&&e.ew[k]!=null)?e.ew[k]:(S.events[k]||{}).weight||0;return'<div class="flex items-center justify-between bg-hm-surface rounded-lg px-3 py-2"><span class="text-[11px] text-hm-muted">'+k.toUpperCase()+' \u00b7 '+(S.events[k]||{}).name+'</span><span class="font-mono text-[11px] font-600">'+e[k]+' x '+w+'g = <span class="text-hm-amber">'+fN(c.ev[k])+' g</span></span></div>'}).join('')+'</div><div class="bg-hm-amber/10 border border-hm-amber/20 rounded-xl p-4 text-center"><div class="text-[9px] text-hm-amber uppercase tracking-widest font-600 mb-1">Total Hotmelt</div><div class="font-mono font-700 text-2xl text-hm-amber">'+fN(c.total)+' g</div><div class="font-mono text-sm text-hm-text">'+c.totalKg+' kg</div><div class="text-[10px] text-hm-muted mt-1">'+(c.actualPcs>0?'Actual '+fN(c.actualW)+'g + Events '+fN(c.evTotal)+'g':'Plan '+fN(c.planW)+'g + Events '+fN(c.evTotal)+'g')+'</div></div>';opM('mV')}
-function vGtR(){clM('mV');swTab('report');setTimeout(function(){var r=document.querySelector('[data-rid="'+cVId+'"]');if(r){r.classList.add('hr');r.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){r.classList.remove('hr')},2500)}},350)}
-function opEM(id){cEId=id;var e=LD.find(function(x){return x.id===id});if(!e)return;var ct=document.getElementById('mEC');ct.innerHTML='<div class="grid grid-cols-2 gap-3"><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Date</label><input type="date" id="ed-dt" value="'+e.date+'" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Time</label><input type="time" id="ed-tm" value="'+(e.time||'')+'" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Operator</label><select id="ed-op" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40">'+S.operators.map(function(o){return'<option '+(o===e.operator?'selected':'')+'>'+o+'</option>'}).join('')+'</select></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Shift</label><select id="ed-sh" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40">'+['Shift A','Shift B','Shift C'].map(function(s){return'<option '+(s===e.shift?'selected':'')+'>'+s+'</option>'}).join('')+'</select></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Changeover</label><select id="ed-co" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40"><option '+(e.cover==='NO'?'selected':'')+'>NO</option><option '+(e.cover==='YES'?'selected':'')+'>YES</option></select></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Plan (pcs)</label><input type="number" id="ed-pl" value="'+e.plan+'" min="0" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div><div class="col-span-2"><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Actual Running (pcs)</label><input type="number" id="ed-ac" value="'+(e.actualPcs||'')+'" min="0" placeholder="Kosongkan jika tiada" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div></div><div class="mt-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-2.5">Event Counts</div><div class="grid grid-cols-3 gap-2.5">'+EK.map(function(k){return'<div class="bg-hm-surface rounded-lg p-2.5"><div class="text-[9px] text-hm-muted mb-1">'+k.toUpperCase()+' \u00b7 '+(S.events[k]||{}).name+'</div><input type="number" id="ed-'+k+'" value="'+e[k]+'" min="0" class="w-full bg-hm-card border border-hm-border rounded-lg px-2 py-1.5 text-center font-mono text-sm font-600 focus:outline-none focus:border-hm-amber/40"></div>'}).join('')+'</div></div><div class="mt-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-2.5">Event Weights (g)</div><div class="grid grid-cols-3 gap-2.5">'+EK.map(function(k){var w=(e.ew&&e.ew[k]!=null)?e.ew[k]:(S.events[k]||{}).weight||0;return'<div class="bg-hm-surface rounded-lg p-2.5"><div class="text-[9px] text-hm-muted mb-1">'+k.toUpperCase()+' Weight</div><input type="number" id="ed-ew-'+k+'" value="'+w+'" min="0" class="w-full bg-hm-card border border-hm-border rounded-lg px-2 py-1.5 text-center font-mono text-sm font-600 text-hm-amber focus:outline-none focus:border-hm-amber/40"></div>'}).join('')+'</div></div>';opM('mE')}
-function svEd(){var e=LD.find(function(x){return x.id===cEId});if(!e)return;var pl=parseInt(document.getElementById('ed-pl').value)||0;if(pl<=0){toast('Plan mesti > 0','error');return}var ew={_wpp:(e.ew&&e.ew._wpp)||S.weightPerPcs};EK.forEach(function(k){ew[k]=Math.max(0,parseInt(document.getElementById('ed-ew-'+k).value)||0)});var entry={id:e.id,date:document.getElementById('ed-dt').value,time:document.getElementById('ed-tm').value,operator:document.getElementById('ed-op').value,shift:document.getElementById('ed-sh').value,cover:document.getElementById('ed-co').value,plan:pl,actualPcs:parseInt(document.getElementById('ed-ac').value)||0,b:Math.max(0,parseInt(document.getElementById('ed-b').value)||0),c:Math.max(0,parseInt(document.getElementById('ed-c').value)||0),d:Math.max(0,parseInt(document.getElementById('ed-d').value)||0),e:Math.max(0,parseInt(document.getElementById('ed-e').value)||0),f:Math.max(0,parseInt(document.getElementById('ed-f').value)||0),g:Math.max(0,parseInt(document.getElementById('ed-g').value)||0),ew:ew};bL('bSE',true);apiPost('updateLog',entry).then(function(r){bL('bSE',false);if(r.success){var idx=LD.findIndex(function(x){return x.id===cEId});if(idx!==-1)LD[idx]=entry;clM('mE');rHist();toast('Rekod '+entry.operator+' dikemaskini!','success')}else{toast('Gagal: '+(r.error||'Unknown'),'error')}}).catch(function(er){bL('bSE',false);toast('Ralat: '+er.message,'error')})}
-function gFD(){var fr=document.getElementById('rDF').value,to=document.getElementById('rDT').value;return LD.filter(function(e){if(fr&&e.date<fr)return false;if(to&&e.date>to)return false;return true}).sort(function(a,b){return a.date.localeCompare(b.date)})}
-function clrDF(){document.getElementById('rDF').value='';document.getElementById('rDT').value='';rRpt()}
-function rRpt(){var d=gFD(),cs=d.map(function(e){return calc(e)}),tK=cs.reduce(function(s,c){return s+c.totalKg},0),aK=cs.length?tK/cs.length:0,pK=cs.length?Math.max.apply(null,cs.map(function(c){return c.totalKg})):0;document.getElementById('rSt').innerHTML='<div class="bg-hm-card border border-hm-border rounded-xl p-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-1">Entries</div><div class="font-mono font-700 text-2xl">'+d.length+'</div></div><div class="bg-hm-card border border-hm-border rounded-xl p-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-1">Total Used</div><div class="font-mono font-700 text-2xl text-hm-amber">'+tK.toFixed(1)+' <span class="text-sm text-hm-muted">kg</span></div></div><div class="bg-hm-card border border-hm-border rounded-xl p-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-1">Avg / Entry</div><div class="font-mono font-700 text-2xl">'+aK.toFixed(1)+' <span class="text-sm text-hm-muted">kg</span></div></div><div class="bg-hm-card border border-hm-border rounded-xl p-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-1">Peak Day</div><div class="font-mono font-700 text-2xl text-hm-green">'+pK.toFixed(1)+' <span class="text-sm text-hm-muted">kg</span></div></div>';rCharts(cs,d);rTBL(d)}
-function rCharts(cs,d){var lb=['ACTUAL PCS','INITIAL (b)','BODY-FIT (c)','BREAK (d)','IDLING (e)','REPLACE (f)','PURGE (g)'],cl=['#38bdf8','#f59e0b','#f97316','#ef4444','#6b7280','#8b5cf6','#ec4899'],apt=cs.reduce(function(s,c){return s+(c.actualPcs>0?c.actualW:c.planW)},0),vl=[parseFloat((apt/1000).toFixed(1))];EK.forEach(function(k){vl.push(parseFloat((cs.reduce(function(s,c){return s+c.ev[k]},0)/1000).toFixed(1)))});if(chE)chE.destroy();chE=new Chart(document.getElementById('cE'),{type:'bar',data:{labels:lb,datasets:[{data:vl,backgroundColor:cl.map(function(c){return c+'35'}),borderColor:cl,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#141420',borderColor:'#2a2a3a',borderWidth:1,titleFont:{family:'Outfit',size:12},bodyFont:{family:'JetBrains Mono',size:11},padding:10,callbacks:{label:function(x){return x.parsed.y.toFixed(1)+' kg'}}}},scales:{x:{ticks:{color:'#5a5a72',font:{family:'Outfit',size:9}},grid:{color:'#1a1a28'},border:{color:'#1a1a28'}},y:{ticks:{color:'#5a5a72',font:{family:'JetBrains Mono',size:9},callback:function(v){return v+'kg'}},grid:{color:'#1a1a28'},border:{color:'#1a1a28'},beginAtZero:true}}}});var dl=d.map(function(e){return fDS(e.date)}),dv=cs.map(function(c){return c.totalKg});if(chD)chD.destroy();chD=new Chart(document.getElementById('cD'),{type:'line',data:{labels:dl,datasets:[{data:dv,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.06)',borderWidth:2.5,fill:true,tension:0.35,pointBackgroundColor:'#f59e0b',pointBorderColor:'#0f0f16',pointBorderWidth:2,pointRadius:5,pointHoverRadius:7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#141420',borderColor:'#2a2a3a',borderWidth:1,titleFont:{family:'Outfit',size:12},bodyFont:{family:'JetBrains Mono',size:11},padding:10,callbacks:{label:function(x){return x.parsed.y.toFixed(1)+' kg'}}}},scales:{x:{ticks:{color:'#5a5a72',font:{family:'Outfit',size:9}},grid:{color:'#1a1a28'},border:{color:'#1a1a28'}},y:{ticks:{color:'#5a5a72',font:{family:'JetBrains Mono',size:9},callback:function(v){return v+'kg'}},grid:{color:'#1a1a28'},border:{color:'#1a1a28'},beginAtZero:false}}}})}
-function rTBL(d){document.getElementById('tCn').textContent=d.length+' rekod';var tb=document.getElementById('rTB');if(!d.length){tb.innerHTML='<tr><td colspan="14" class="text-center py-8 text-hm-muted text-xs">Tiada data</td></tr>';return}tb.innerHTML=d.map(function(e){var c=calc(e);return'<tr data-rid="'+e.id+'" class="border-b border-hm-border/40 hover:bg-hm-surface/50 transition-colors cursor-pointer" onclick="opVM('+e.id+')"><td class="px-3 py-2 text-left">'+e.date+'</td><td class="px-3 py-2 text-left font-display font-600">'+e.operator+'</td><td class="px-3 py-2 text-left"><span class="text-[9px] font-600 px-1.5 py-0.5 rounded border '+sC(e.shift)+'">'+e.shift+'</span></td><td class="px-3 py-2 text-center"><span class="text-[9px] font-600 px-1.5 py-0.5 rounded border '+cC(e.cover)+'">'+e.cover+'</span></td><td class="px-3 py-2 text-right">'+fN(e.plan)+'</td><td class="px-3 py-2 text-right '+(c.actualPcs>0?'text-hm-sky font-600':'text-hm-muted')+'">'+(c.actualPcs>0?fN(c.actualPcs):'\u2014')+'</td><td class="px-3 py-2 text-center text-hm-amber/70">'+e.b+'</td><td class="px-3 py-2 text-center text-hm-amber/70">'+e.c+'</td><td class="px-3 py-2 text-center text-hm-amber/70">'+e.d+'</td><td class="px-3 py-2 text-center text-hm-amber/70">'+e.e+'</td><td class="px-3 py-2 text-center text-hm-amber/70">'+e.f+'</td><td class="px-3 py-2 text-center text-hm-amber/70">'+e.g+'</td><td class="px-3 py-2 text-right font-600">'+fN(c.total)+' g</td><td class="px-3 py-2 text-right font-600 text-hm-amber">'+c.totalKg+' kg</td></tr>'}).join('')}
-function opSet(){var ct=document.getElementById('mSC');ct.innerHTML='<div class="bg-hm-amber/5 border border-hm-amber/20 rounded-lg p-3 mb-1"><div class="text-[10px] text-hm-amber font-600"><i class="fas fa-info-circle mr-1.5"></i>Nilai DEFAULT ni disimpan ke sheet SETTINGS. Boleh di-override di Usage Input.</div></div><div><div class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-2.5">Parameter</div><div class="bg-hm-surface rounded-lg p-3"><label class="text-xs text-hm-text font-500 block mb-1.5">Weight per 1 pcs (g)</label><input type="number" id="s-wpp" value="'+S.weightPerPcs+'" min="1" class="w-32 bg-hm-card border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div></div><div><div class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-2.5">Event Weights &amp; Default Counts</div><div class="space-y-2">'+EK.map(function(k){var ev=S.events[k]||{name:k,weight:0,defaultCount:0};return'<div class="bg-hm-surface rounded-lg px-4 py-3 flex flex-wrap items-center gap-4"><span class="text-xs font-600 text-hm-amber w-6">'+k.toUpperCase()+'</span><span class="text-xs text-hm-muted flex-1 min-w-[100px]">'+ev.name+'</span><div class="flex items-center gap-2"><label class="text-[9px] text-hm-muted">Weight(g)</label><input type="number" id="s-w-'+k+'" value="'+ev.weight+'" min="0" class="w-20 bg-hm-card border border-hm-border rounded-lg px-2 py-1.5 text-sm font-mono text-center text-hm-amber focus:outline-none focus:border-hm-amber/40"></div><div class="flex items-center gap-2"><label class="text-[9px] text-hm-muted">Default</label><input type="number" id="s-d-'+k+'" value="'+ev.defaultCount+'" min="0" class="w-16 bg-hm-card border border-hm-border rounded-lg px-2 py-1.5 text-sm font-mono text-center focus:outline-none focus:border-hm-amber/40"></div></div>'}).join('')+'</div></div><div><div class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-2.5">Operator List</div><div id="oL" class="space-y-2">'+S.operators.map(function(o){return'<div class="flex items-center gap-2"><input type="text" value="'+o+'" class="sop flex-1 bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40"><button onclick="this.parentElement.remove()" class="w-7 h-7 rounded-lg border border-hm-border hover:border-red-500/50 text-hm-muted hover:text-red-400 flex items-center justify-center transition-colors"><i class="fas fa-trash text-[10px]"></i></button></div>'}).join('')+'</div><button onclick="addOp()" class="mt-2 text-[11px] text-hm-amber hover:underline"><i class="fas fa-plus mr-1"></i>Tambah Operator</button></div><div class="pt-2 border-t border-hm-border"><button onclick="rstAll()" class="px-4 py-2 rounded-lg border border-red-500/30 text-red-400 text-[11px] font-600 hover:bg-red-500/10 transition-colors"><i class="fas fa-triangle-exclamation mr-1.5"></i>Reset Semua Data ke Default</button></div>';opM('mS')}
-function addOp(){var l=document.getElementById('oL'),d=document.createElement('div');d.className='flex items-center gap-2';d.innerHTML='<input type="text" value="" placeholder="Nama baru" class="sop flex-1 bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40"><button onclick="this.parentElement.remove()" class="w-7 h-7 rounded-lg border border-hm-border hover:border-red-500/50 text-hm-muted hover:text-red-400 flex items-center justify-center transition-colors"><i class="fas fa-trash text-[10px]"></i></button>';l.appendChild(d)}
-function svSet(){var data={weightPerPcs:parseInt(document.getElementById('s-wpp').value)||48,events:{},operators:[]};EK.forEach(function(k){data.events[k]={name:(S.events[k]||{}).name||k,weight:Math.max(0,parseInt(document.getElementById('s-w-'+k).value)||0),defaultCount:Math.max(0,parseInt(document.getElementById('s-d-'+k).value)||0)}});document.querySelectorAll('.sop').forEach(function(inp){var v=inp.value.trim();if(v)data.operators.push(v.toUpperCase())});if(!data.operators.length)data.operators=['AHMAD'];bL('bSS',true);apiPost('saveSettings',data).then(function(r){bL('bSS',false);if(r.success){S=data;rOpDD();rCnt();clM('mS');toast('Settings disimpan ke Spreadsheet!','success')}else{toast('Gagal: '+(r.error||'Unknown'),'error')}}).catch(function(e){bL('bSS',false);toast('Ralat: '+e.message,'error')})}
-function rstAll(){if(!confirm('Pasti mahu reset SEMUA data?'))return;bL('bSS',true);apiPost('resetAll',{}).then(function(r){bL('bSS',false);if(r.success){clM('mS');loadApp()}else{toast('Gagal','error')}}).catch(function(e){bL('bSS',false);toast('Ralat: '+e.message,'error')})}
-document.addEventListener('keydown',function(e){if(e.key==='Escape')['mV','mE','mS'].forEach(function(id){clM(id)})});
-['mV','mE','mS'].forEach(function(id){document.getElementById(id).addEventListener('click',function(e){if(e.target===this)clM(id)})});
-function loadApp(){document.getElementById('ldTx').textContent='Initializing spreadsheet...';apiGet('init').then(function(){return apiGet('getSettings')}).then(function(s){S=s;rOpDD();setNow();document.getElementById('ldTx').textContent='Loading log data...';return apiGet('getLog')}).then(function(log){LD=log;if(log.length){nId=Math.max.apply(null,log.map(function(e){return e.id}))+1}else{nId=1}rCnt();document.getElementById('ldOv').style.opacity='0';document.getElementById('ldOv').style.transition='opacity .4s';setTimeout(function(){document.getElementById('ldOv').style.display='none'},400);document.getElementById('setupScreen').classList.add('hidden');document.getElementById('mainApp').classList.remove('hidden')}).catch(function(e){document.getElementById('ldTx').textContent='Error: '+e.message})}
-function init(){if(API_URL){loadApp()}else{document.getElementById('ldOv').style.display='none';document.getElementById('setupScreen').classList.remove('hidden');document.getElementById('setupScreen').style.display='flex'}}
+/* ================================================================
+   API CLIENT — fetch-based communication dengan Google Script
+   ================================================================ */
+var API_URL = localStorage.getItem('hm_api_url') || '';
+
+function apiGet(action) {
+  var sep = API_URL.indexOf('?') === -1 ? '?' : '&';
+  return fetch(API_URL + sep + 'action=' + encodeURIComponent(action))
+    .then(function(r) { return r.json(); });
+}
+
+function apiPost(action, data) {
+  return fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: action, data: data })
+  }).then(function(r) { return r.json(); });
+}
+
+/* ================================================================
+   DATA
+   ================================================================ */
+var EK = ['b','c','d','e','f','g'];
+var S = { weightPerPcs: 48, events: {}, operators: [] };
+var LD = [];
+var nId = 1, cVId = null, cEId = null, chE = null, chD = null;
+
+/* ================================================================
+   UTILITY
+   ================================================================ */
+function calc(e) {
+  var wpp = (e.ew && e.ew._wpp) || S.weightPerPcs;
+  var plW = e.plan * wpp, ap = e.actualPcs || 0, acW = ap * wpp, ev = {}, evT = 0;
+  EK.forEach(function(k) { var w = (e.ew && e.ew[k] != null) ? e.ew[k] : (S.events[k] ? S.events[k].weight : 0); ev[k] = (e[k] || 0) * w; evT += ev[k]; });
+  var bW = ap > 0 ? acW : plW, t = bW + evT;
+  return { wpp: wpp, planW: plW, actualPcs: ap, actualW: acW, ev: ev, evTotal: evT, baseW: bW, total: t, totalKg: parseFloat((t / 1000).toFixed(1)) };
+}
+function fN(n) { return (n || 0).toLocaleString('en-MY'); }
+function fDD(d) { if (!d) return '—'; var p = d.split('-'); return p[0] + ' - ' + p[1] + ' - ' + p[2]; }
+function fDS(d) { if (!d) return ''; var dt = new Date(d + 'T00:00:00'); var m = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis']; return dt.getDate() + ' ' + m[dt.getMonth()]; }
+function sC(s) { return s === 'Shift A' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : s === 'Shift B' ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-sky-500/15 text-sky-400 border-sky-500/30'; }
+function cC(c) { return c === 'YES' ? 'bg-red-500/15 text-red-400 border-red-500/30' : 'bg-zinc-600/15 text-zinc-400 border-zinc-600/30'; }
+
+function toast(msg, tp) {
+  tp = tp || 'success'; var c = document.getElementById('tC'), t = document.createElement('div');
+  var ic = { success: 'check-circle', error: 'exclamation-circle', info: 'info-circle' };
+  t.className = 'toast t' + tp[0]; t.innerHTML = '<i class="fas fa-' + (ic[tp] || 'info-circle') + ' mr-2"></i>' + msg;
+  c.appendChild(t); setTimeout(function() { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(function() { t.remove(); }, 300); }, 3200);
+}
+function opM(id) { var m = document.getElementById(id); m.classList.remove('hidden'); m.classList.add('flex'); }
+function clM(id) { var m = document.getElementById(id); m.classList.add('hidden'); m.classList.remove('flex'); }
+function bL(bid, ld) { var b = document.getElementById(bid); if (!b) return; if (ld) { b._o = b.innerHTML; b.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>Saving...'; b.classList.add('bd'); } else { b.innerHTML = b._o || b.innerHTML; b.classList.remove('bd'); } }
+
+/* ================================================================
+   SETUP
+   ================================================================ */
+function doSetup() {
+  var url = document.getElementById('setupUrl').value.trim();
+  var errEl = document.getElementById('setupErr');
+  if (!url) { errEl.textContent = 'Sila masukkan URL.'; errEl.classList.remove('hidden'); return; }
+  if (!url.startsWith('https://script.google.com')) { errEl.textContent = 'URL mesti bermula dengan https://script.google.com'; errEl.classList.remove('hidden'); return; }
+
+  var btn = document.getElementById('setupBtn');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyambung...'; btn.classList.add('bd');
+  errEl.classList.add('hidden');
+
+  // Test connection
+  var testUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=ping';
+  fetch(testUrl).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.status === 'ok') {
+      API_URL = url;
+      localStorage.setItem('hm_api_url', url);
+      loadApp();
+    } else {
+      throw new Error(data.error || 'Respons tidak sah');
+    }
+  }).catch(function(e) {
+    btn.innerHTML = '<i class="fas fa-plug mr-2"></i>SAMBUNG'; btn.classList.remove('bd');
+    errEl.textContent = 'Gagal sambung: ' + e.message; errEl.classList.remove('hidden');
+  });
+}
+
+function disconnect() {
+  if (!confirm('Putus sambungan ke Spreadsheet? URL akan dialih keluar.')) return;
+  localStorage.removeItem('hm_api_url');
+  API_URL = '';
+  location.reload();
+}
+
+/* ================================================================
+   TAB
+   ================================================================ */
+function swTab(n) { ['input','history','report'].forEach(function(t) { document.getElementById('p-' + t).classList.toggle('hidden', t !== n); document.getElementById('tB' + t[0]).className = t === n ? 'tab-active px-4 py-4 text-[13px] font-600 tracking-wide transition-all' : 'tab-inactive px-4 py-4 text-[13px] font-600 tracking-wide transition-all'; }); if (n === 'history') rHist(); if (n === 'report') rRpt(); }
+
+/* ================================================================
+   COUNTERS
+   ================================================================ */
+function rCnt() {
+  var g = document.getElementById('cG');
+  g.innerHTML = EK.map(function(k) {
+    var ev = S.events[k] || { name: k, weight: 0, defaultCount: 0 };
+    return '<div class="bg-hm-card border border-hm-border rounded-xl p-4 chover"><div class="text-[9px] text-hm-muted uppercase tracking-[.12em] font-600 mb-3">' + k + ' · ' + ev.name + '</div><div class="flex items-center gap-2 mb-3"><button onclick="chC(\'' + k + '\',-1)" class="cbtn w-8 h-8 rounded-lg border border-hm-border hover:border-hm-amber/50 text-hm-muted hover:text-hm-amber flex items-center justify-center transition-colors"><i class="fas fa-minus text-[10px]"></i></button><span id="c-' + k + '" class="w-8 text-center text-xl font-mono font-700">' + ev.defaultCount + '</span><button onclick="chC(\'' + k + '\',1)" class="cbtn w-8 h-8 rounded-lg border border-hm-border hover:border-hm-amber/50 text-hm-muted hover:text-hm-amber flex items-center justify-center transition-colors"><i class="fas fa-plus text-[10px]"></i></button></div><div class="flex items-center justify-between bg-hm-surface rounded-lg px-3 py-2"><div class="flex items-center gap-1.5"><label class="text-[9px] text-hm-muted uppercase">W(g)</label><input type="number" id="ew-' + k + '" value="' + ev.weight + '" min="0" class="wi" oninput="upCal()"></div><div class="text-right"><span id="cl-' + k + '" class="font-mono text-[12px] font-600 text-hm-text">' + fN(ev.defaultCount * ev.weight) + ' g</span></div></div></div>';
+  }).join(''); upCal();
+}
+function chC(k, d) { var el = document.getElementById('c-' + k); var v = parseInt(el.textContent) + d; if (v < 0) v = 0; el.textContent = v; upCal(); }
+function gC(k) { return parseInt(document.getElementById('c-' + k).textContent) || 0; }
+function gEW(k) { return Math.max(0, parseInt(document.getElementById('ew-' + k).value) || 0); }
+
+function upCal() {
+  var wpp = S.weightPerPcs, pl = parseInt(document.getElementById('iPl').value) || 0, ac = parseInt(document.getElementById('iAc').value) || 0;
+  document.getElementById('dW1').textContent = wpp; document.getElementById('dW2').textContent = wpp;
+  var plW = pl * wpp, acW = ac * wpp;
+  document.getElementById('dPW').textContent = fN(plW) + ' g'; document.getElementById('dPK').textContent = (plW / 1000).toFixed(1) + ' kg';
+  document.getElementById('dAW').textContent = fN(acW) + ' g'; document.getElementById('dAK').textContent = (acW / 1000).toFixed(1) + ' kg';
+  var evT = 0; EK.forEach(function(k) { var g = gC(k) * gEW(k); evT += g; document.getElementById('cl-' + k).textContent = fN(g) + ' g'; });
+  var bW = ac > 0 ? acW : plW, tG = bW + evT;
+  document.getElementById('dTG').textContent = fN(tG); document.getElementById('dTK').textContent = (tG / 1000).toFixed(1);
+  document.getElementById('dSP').textContent = fN(plW) + 'g'; document.getElementById('dSE').textContent = fN(evT) + 'g';
+  var aw = document.getElementById('dSAW');
+  if (ac > 0) { aw.classList.remove('hidden'); document.getElementById('dSA').textContent = fN(acW) + 'g'; document.getElementById('dSE2').textContent = fN(evT) + 'g'; } else { aw.classList.add('hidden'); }
+}
+
+function rstEW() { EK.forEach(function(k) { document.getElementById('ew-' + k).value = (S.events[k] || {}).weight || 0; }); upCal(); toast('Event weights reset ke default', 'info'); }
+function rstForm() { EK.forEach(function(k) { document.getElementById('c-' + k).textContent = (S.events[k] || {}).defaultCount || 0; document.getElementById('ew-' + k).value = (S.events[k] || {}).weight || 0; }); document.getElementById('iPl').value = 8000; document.getElementById('iAc').value = ''; setNow(); upCal(); toast('Counter direset ke default', 'info'); }
+
+function svLog() {
+  var op = document.getElementById('iOp').value, dt = document.getElementById('iDt').value, tm = document.getElementById('iTm').value;
+  var sh = document.getElementById('iSh').value, co = document.getElementById('iCo').value;
+  var pl = parseInt(document.getElementById('iPl').value) || 0, ap = parseInt(document.getElementById('iAc').value) || 0;
+  if (!op) { toast('Sila pilih operator', 'error'); return; } if (!dt) { toast('Sila pilih tarikh', 'error'); return; } if (pl <= 0) { toast('Plan mesti > 0', 'error'); return; }
+  var ew = { _wpp: S.weightPerPcs }; EK.forEach(function(k) { ew[k] = gEW(k); });
+  var entry = { date: dt, time: tm, operator: op, shift: sh, cover: co, plan: pl, actualPcs: ap, b: gC('b'), c: gC('c'), d: gC('d'), e: gC('e'), f: gC('f'), g: gC('g'), ew: ew };
+  bL('bSv', true);
+  apiPost('addLog', entry).then(function(r) {
+    bL('bSv', false);
+    if (r.success) { entry.id = r.id; LD.push(entry); nId = r.id + 1; var c = calc(entry); toast('Disimpan! Total: ' + fN(c.total) + 'g (' + c.totalKg + ' kg)', 'success'); rstForm(); }
+    else { toast('Gagal: ' + (r.error || 'Unknown'), 'error'); }
+  }).catch(function(e) { bL('bSv', false); toast('Ralat: ' + e.message, 'error'); });
+}
+
+function setNow() { var n = new Date(); document.getElementById('iDt').value = n.toISOString().split('T')[0]; document.getElementById('iTm').value = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'); }
+function rOpDD() { document.getElementById('iOp').innerHTML = S.operators.map(function(o) { return '<option>' + o + '</option>'; }).join(''); }
+
+/* ================================================================
+   HISTORY
+   ================================================================ */
+function rHist() {
+  var sr = (document.getElementById('hSrch').value || '').toLowerCase(), sf = document.getElementById('hSF').value, cf = document.getElementById('hCF').value;
+  var f = LD.filter(function(e) { if (sr && !e.operator.toLowerCase().includes(sr) && !(e.date || '').includes(sr)) return false; if (sf && e.shift !== sf) return false; if (cf && e.cover !== cf) return false; return true; }).sort(function(a, b) { return a.date !== b.date ? b.date.localeCompare(a.date) : b.id - a.id; });
+  var g = document.getElementById('hG'), em = document.getElementById('hE');
+  if (!f.length) { g.innerHTML = ''; em.classList.remove('hidden'); return; } em.classList.add('hidden');
+  g.innerHTML = f.map(function(e) { var c = calc(e), pd = c.actualPcs > 0 ? 'actual ' + fN(c.actualPcs) + ' pcs' : 'plan ' + fN(e.plan) + ' pcs';
+    return '<div class="bg-hm-card border border-hm-border rounded-xl p-4 chover slide-up"><div class="text-[10px] text-hm-muted font-mono mb-1.5">' + fDD(e.date) + ' · ' + (e.time || '--:--') + '</div><div class="flex gap-1.5 mb-2.5"><span class="text-[9px] font-600 px-1.5 py-0.5 rounded-md border ' + sC(e.shift) + '">' + e.shift + '</span><span class="text-[9px] font-600 px-1.5 py-0.5 rounded-md border ' + cC(e.cover) + '">C/O ' + e.cover + '</span></div><div class="font-display font-800 text-xl mb-0.5 tracking-wide">' + e.operator + '</div><div class="text-[11px] text-hm-muted mb-0.5">' + pd + '</div><div class="font-mono font-700 text-lg text-hm-amber">' + c.totalKg + ' kg</div><div class="font-mono text-[10px] text-hm-muted mb-3">(' + fN(c.total) + ' g)</div><div class="flex gap-2"><button onclick="opVM(' + e.id + ')" class="flex-1 py-1.5 rounded-lg border border-hm-border text-hm-text text-[11px] font-600 hover:border-hm-amber/40 hover:text-hm-amber transition-all"><i class="fas fa-eye mr-1"></i>VIEW</button><button onclick="opEM(' + e.id + ')" class="flex-1 py-1.5 rounded-lg border border-hm-border text-hm-text text-[11px] font-600 hover:border-hm-sky/40 hover:text-hm-sky transition-all"><i class="fas fa-pen mr-1"></i>EDIT</button></div></div>';
+  }).join('');
+}
+
+/* ================================================================
+   VIEW MODAL
+   ================================================================ */
+function opVM(id) {
+  cVId = id; var e = LD.find(function(x) { return x.id === id; }); if (!e) return; var c = calc(e), ct = document.getElementById('mVC');
+  var ps = '';
+  if (c.actualPcs > 0) { ps = '<div class="grid grid-cols-2 gap-3 mb-4"><div class="bg-hm-surface rounded-lg p-3"><div class="text-[9px] text-hm-muted uppercase tracking-widest mb-1">Plan (pcs)</div><div class="font-mono font-700 text-sm">' + fN(e.plan) + '</div><div class="font-mono text-[10px] text-hm-green">' + fN(c.planW) + ' g</div></div><div class="bg-hm-surface rounded-lg p-3 border border-hm-sky/20"><div class="text-[9px] text-hm-sky uppercase tracking-widest mb-1">Actual Running</div><div class="font-mono font-700 text-sm text-hm-sky">' + fN(c.actualPcs) + ' pcs</div><div class="font-mono text-[10px] text-hm-sky">' + fN(c.actualW) + ' g</div></div></div>'; }
+  else { ps = '<div class="bg-hm-surface rounded-lg p-3 mb-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest mb-1">Plan (pcs)</div><div class="font-mono font-700">' + fN(e.plan) + ' pcs → <span class="text-hm-green">' + fN(c.planW) + ' g</span></div></div>'; }
+  ct.innerHTML = '<div class="flex items-center gap-3 mb-4"><div class="w-11 h-11 rounded-xl bg-hm-surface border border-hm-border flex items-center justify-center"><i class="fas fa-user text-hm-amber text-sm"></i></div><div><div class="font-display font-800 text-lg">' + e.operator + '</div><div class="text-[11px] text-hm-muted font-mono">' + fDD(e.date) + ' · ' + (e.time || '--:--') + '</div></div></div><div class="flex gap-2 mb-4"><span class="text-[10px] font-600 px-2 py-0.5 rounded-lg border ' + sC(e.shift) + '">' + e.shift + '</span><span class="text-[10px] font-600 px-2 py-0.5 rounded-lg border ' + cC(e.cover) + '">C/O ' + e.cover + '</span><span class="text-[10px] font-600 px-2 py-0.5 rounded-lg border bg-hm-surface border-hm-border text-hm-muted">' + c.wpp + 'g/pcs</span></div>' + ps + '<div class="space-y-1.5 mb-4">' + EK.map(function(k) { var w = (e.ew && e.ew[k] != null) ? e.ew[k] : (S.events[k] || {}).weight || 0; return '<div class="flex items-center justify-between bg-hm-surface rounded-lg px-3 py-2"><span class="text-[11px] text-hm-muted">' + k.toUpperCase() + ' · ' + (S.events[k] || {}).name + '</span><span class="font-mono text-[11px] font-600">' + e[k] + ' x ' + w + 'g = <span class="text-hm-amber">' + fN(c.ev[k]) + ' g</span></span></div>'; }).join('') + '</div><div class="bg-hm-amber/10 border border-hm-amber/20 rounded-xl p-4 text-center"><div class="text-[9px] text-hm-amber uppercase tracking-widest font-600 mb-1">Total Hotmelt</div><div class="font-mono font-700 text-2xl text-hm-amber">' + fN(c.total) + ' g</div><div class="font-mono text-sm text-hm-text">' + c.totalKg + ' kg</div><div class="text-[10px] text-hm-muted mt-1">' + (c.actualPcs > 0 ? 'Actual ' + fN(c.actualW) + 'g + Events ' + fN(c.evTotal) + 'g' : 'Plan ' + fN(c.planW) + 'g + Events ' + fN(c.evTotal) + 'g') + '</div></div>';
+  opM('mV');
+}
+function vGtR() { clM('mV'); swTab('report'); setTimeout(function() { var r = document.querySelector('[data-rid="' + cVId + '"]'); if (r) { r.classList.add('hr'); r.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(function() { r.classList.remove('hr'); }, 2500); } }, 350); }
+
+/* ================================================================
+   EDIT MODAL
+   ================================================================ */
+function opEM(id) {
+  cEId = id; var e = LD.find(function(x) { return x.id === id; }); if (!e) return; var ct = document.getElementById('mEC');
+  ct.innerHTML = '<div class="grid grid-cols-2 gap-3"><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Date</label><input type="date" id="ed-dt" value="' + e.date + '" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Time</label><input type="time" id="ed-tm" value="' + (e.time || '') + '" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Operator</label><select id="ed-op" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40">' + S.operators.map(function(o) { return '<option ' + (o === e.operator ? 'selected' : '') + '>' + o + '</option>'; }).join('') + '</select></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Shift</label><select id="ed-sh" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40">' + ['Shift A', 'Shift B', 'Shift C'].map(function(s) { return '<option ' + (s === e.shift ? 'selected' : '') + '>' + s + '</option>'; }).join('') + '</select></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Changeover</label><select id="ed-co" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40"><option ' + (e.cover === 'NO' ? 'selected' : '') + '>NO</option><option ' + (e.cover === 'YES' ? 'selected' : '') + '>YES</option></select></div><div><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Plan (pcs)</label><input type="number" id="ed-pl" value="' + e.plan + '" min="0" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div><div class="col-span-2"><label class="text-[9px] text-hm-muted uppercase tracking-widest font-600 block mb-1">Actual Running (pcs)</label><input type="number" id="ed-ac" value="' + (e.actualPcs || '') + '" min="0" placeholder="Kosongkan jika tiada" class="w-full bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div></div><div class="mt-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-2.5">Event Counts</div><div class="grid grid-cols-3 gap-2.5">' + EK.map(function(k) { return '<div class="bg-hm-surface rounded-lg p-2.5"><div class="text-[9px] text-hm-muted mb-1">' + k.toUpperCase() + ' · ' + (S.events[k] || {}).name + '</div><input type="number" id="ed-' + k + '" value="' + e[k] + '" min="0" class="w-full bg-hm-card border border-hm-border rounded-lg px-2 py-1.5 text-center font-mono text-sm font-600 focus:outline-none focus:border-hm-amber/40"></div>'; }).join('') + '</div></div><div class="mt-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-2.5">Event Weights (g)</div><div class="grid grid-cols-3 gap-2.5">' + EK.map(function(k) { var w = (e.ew && e.ew[k] != null) ? e.ew[k] : (S.events[k] || {}).weight || 0; return '<div class="bg-hm-surface rounded-lg p-2.5"><div class="text-[9px] text-hm-muted mb-1">' + k.toUpperCase() + ' Weight</div><input type="number" id="ed-ew-' + k + '" value="' + w + '" min="0" class="w-full bg-hm-card border border-hm-border rounded-lg px-2 py-1.5 text-center font-mono text-sm font-600 text-hm-amber focus:outline-none focus:border-hm-amber/40"></div>'; }).join('') + '</div></div>';
+  opM('mE');
+}
+function svEd() {
+  var e = LD.find(function(x) { return x.id === cEId; }); if (!e) return;
+  var pl = parseInt(document.getElementById('ed-pl').value) || 0; if (pl <= 0) { toast('Plan mesti > 0', 'error'); return; }
+  var ew = { _wpp: (e.ew && e.ew._wpp) || S.weightPerPcs }; EK.forEach(function(k) { ew[k] = Math.max(0, parseInt(document.getElementById('ed-ew-' + k).value) || 0); });
+  var entry = { id: e.id, date: document.getElementById('ed-dt').value, time: document.getElementById('ed-tm').value, operator: document.getElementById('ed-op').value, shift: document.getElementById('ed-sh').value, cover: document.getElementById('ed-co').value, plan: pl, actualPcs: parseInt(document.getElementById('ed-ac').value) || 0, b: Math.max(0, parseInt(document.getElementById('ed-b').value) || 0), c: Math.max(0, parseInt(document.getElementById('ed-c').value) || 0), d: Math.max(0, parseInt(document.getElementById('ed-d').value) || 0), e: Math.max(0, parseInt(document.getElementById('ed-e').value) || 0), f: Math.max(0, parseInt(document.getElementById('ed-f').value) || 0), g: Math.max(0, parseInt(document.getElementById('ed-g').value) || 0), ew: ew };
+  bL('bSE', true);
+  apiPost('updateLog', entry).then(function(r) { bL('bSE', false); if (r.success) { var idx = LD.findIndex(function(x) { return x.id === cEId; }); if (idx !== -1) LD[idx] = entry; clM('mE'); rHist(); toast('Rekod ' + entry.operator + ' dikemaskini!', 'success'); } else { toast('Gagal: ' + (r.error || 'Unknown'), 'error'); } }).catch(function(er) { bL('bSE', false); toast('Ralat: ' + er.message, 'error'); });
+}
+
+/* ================================================================
+   REPORT
+   ================================================================ */
+function gFD() { var fr = document.getElementById('rDF').value, to = document.getElementById('rDT').value; return LD.filter(function(e) { if (fr && e.date < fr) return false; if (to && e.date > to) return false; return true; }).sort(function(a, b) { return a.date.localeCompare(b.date); }); }
+function clrDF() { document.getElementById('rDF').value = ''; document.getElementById('rDT').value = ''; rRpt(); }
+function rRpt() {
+  var d = gFD(), cs = d.map(function(e) { return calc(e); }), tK = cs.reduce(function(s, c) { return s + c.totalKg; }, 0), aK = cs.length ? tK / cs.length : 0, pK = cs.length ? Math.max.apply(null, cs.map(function(c) { return c.totalKg; })) : 0;
+  document.getElementById('rSt').innerHTML = '<div class="bg-hm-card border border-hm-border rounded-xl p-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-1">Entries</div><div class="font-mono font-700 text-2xl">' + d.length + '</div></div><div class="bg-hm-card border border-hm-border rounded-xl p-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-1">Total Used</div><div class="font-mono font-700 text-2xl text-hm-amber">' + tK.toFixed(1) + ' <span class="text-sm text-hm-muted">kg</span></div></div><div class="bg-hm-card border border-hm-border rounded-xl p-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-1">Avg / Entry</div><div class="font-mono font-700 text-2xl">' + aK.toFixed(1) + ' <span class="text-sm text-hm-muted">kg</span></div></div><div class="bg-hm-card border border-hm-border rounded-xl p-4"><div class="text-[9px] text-hm-muted uppercase tracking-widest font-600 mb-1">Peak Day</div><div class="font-mono font-700 text-2xl text-hm-green">' + pK.toFixed(1) + ' <span class="text-sm text-hm-muted">kg</span></div></div>';
+  rCharts(cs, d); rTBL(d);
+}
+function rCharts(cs, d) {
+  var lb = ['ACTUAL PCS', 'INITIAL (b)', 'BODY-FIT (c)', 'BREAK (d)', 'IDLING (e)', 'REPLACE (f)', 'PURGE (g)'];
+  var cl = ['#38bdf8', '#f59e0b', '#f97316', '#ef4444', '#6b7280', '#8b5cf6', '#ec4899'];
+  var apt = cs.reduce(function(s, c) { return s + (c.actualPcs > 0 ? c.actualW : c.planW); }, 0);
+  var vl = [parseFloat((apt / 1000).toFixed(1))]; EK.forEach(function(k) { vl.push(parseFloat((cs.reduce(function(s, c) { return s + c.ev[k]; }, 0) / 1000).toFixed(1))); });
+  if (chE) chE.destroy();
+  chE = new Chart(document.getElementById('cE'), { type: 'bar', data: { labels: lb, datasets: [{ data: vl, backgroundColor: cl.map(function(c) { return c + '35'; }), borderColor: cl, borderWidth: 1.5, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#141420', borderColor: '#2a2a3a', borderWidth: 1, titleFont: { family: 'Outfit', size: 12 }, bodyFont: { family: 'JetBrains Mono', size: 11 }, padding: 10, callbacks: { label: function(x) { return x.parsed.y.toFixed(1) + ' kg'; } } } }, scales: { x: { ticks: { color: '#5a5a72', font: { family: 'Outfit', size: 9 } }, grid: { color: '#1a1a28' }, border: { color: '#1a1a28' } }, y: { ticks: { color: '#5a5a72', font: { family: 'JetBrains Mono', size: 9 }, callback: function(v) { return v + 'kg'; } }, grid: { color: '#1a1a28' }, border: { color: '#1a1a28' }, beginAtZero: true } } } });
+  var dl = d.map(function(e) { return fDS(e.date); }), dv = cs.map(function(c) { return c.totalKg; });
+  if (chD) chD.destroy();
+  chD = new Chart(document.getElementById('cD'), { type: 'line', data: { labels: dl, datasets: [{ data: dv, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.06)', borderWidth: 2.5, fill: true, tension: 0.35, pointBackgroundColor: '#f59e0b', pointBorderColor: '#0f0f16', pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#141420', borderColor: '#2a2a3a', borderWidth: 1, titleFont: { family: 'Outfit', size: 12 }, bodyFont: { family: 'JetBrains Mono', size: 11 }, padding: 10, callbacks: { label: function(x) { return x.parsed.y.toFixed(1) + ' kg'; } } } }, scales: { x: { ticks: { color: '#5a5a72', font: { family: 'Outfit', size: 9 } }, grid: { color: '#1a1a28' }, border: { color: '#1a1a28' } }, y: { ticks: { color: '#5a5a72', font: { family: 'JetBrains Mono', size: 9 }, callback: function(v) { return v + 'kg'; } }, grid: { color: '#1a1a28' }, border: { color: '#1a1a28' }, beginAtZero: false } } } });
+}
+function rTBL(d) {
+  document.getElementById('tCn').textContent = d.length + ' rekod'; var tb = document.getElementById('rTB');
+  if (!d.length) { tb.innerHTML = '<tr><td colspan="14" class="text-center py-8 text-hm-muted text-xs">Tiada data</td></tr>'; return; }
+  tb.innerHTML = d.map(function(e) { var c = calc(e); return '<tr data-rid="' + e.id + '" class="border-b border-hm-border/40 hover:bg-hm-surface/50 transition-colors cursor-pointer" onclick="opVM(' + e.id + ')"><td class="px-3 py-2 text-left">' + e.date + '</td><td class="px-3 py-2 text-left font-display font-600">' + e.operator + '</td><td class="px-3 py-2 text-left"><span class="text-[9px] font-600 px-1.5 py-0.5 rounded border ' + sC(e.shift) + '">' + e.shift + '</span></td><td class="px-3 py-2 text-center"><span class="text-[9px] font-600 px-1.5 py-0.5 rounded border ' + cC(e.cover) + '">' + e.cover + '</span></td><td class="px-3 py-2 text-right">' + fN(e.plan) + '</td><td class="px-3 py-2 text-right ' + (c.actualPcs > 0 ? 'text-hm-sky font-600' : 'text-hm-muted') + '">' + (c.actualPcs > 0 ? fN(c.actualPcs) : '—') + '</td><td class="px-3 py-2 text-center text-hm-amber/70">' + e.b + '</td><td class="px-3 py-2 text-center text-hm-amber/70">' + e.c + '</td><td class="px-3 py-2 text-center text-hm-amber/70">' + e.d + '</td><td class="px-3 py-2 text-center text-hm-amber/70">' + e.e + '</td><td class="px-3 py-2 text-center text-hm-amber/70">' + e.f + '</td><td class="px-3 py-2 text-center text-hm-amber/70">' + e.g + '</td><td class="px-3 py-2 text-right font-600">' + fN(c.total) + ' g</td><td class="px-3 py-2 text-right font-600 text-hm-amber">' + c.totalKg + ' kg</td></tr>'; }).join('');
+}
+
+/* ================================================================
+   SETTINGS MODAL
+   ================================================================ */
+function opSet() {
+  var ct = document.getElementById('mSC');
+  ct.innerHTML = '<div class="bg-hm-amber/5 border border-hm-amber/20 rounded-lg p-3 mb-1"><div class="text-[10px] text-hm-amber font-600"><i class="fas fa-info-circle mr-1.5"></i>Nilai DEFAULT ini disimpan ke sheet SETTINGS. Boleh di-override terus di Usage Input.</div></div><div><div class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-2.5">Parameter</div><div class="bg-hm-surface rounded-lg p-3"><label class="text-xs text-hm-text font-500 block mb-1.5">Weight per 1 pcs (g)</label><input type="number" id="s-wpp" value="' + S.weightPerPcs + '" min="1" class="w-32 bg-hm-card border border-hm-border rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-hm-amber/40"></div></div><div><div class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-2.5">Event Weights &amp; Default Counts</div><div class="space-y-2">' + EK.map(function(k) { var ev = S.events[k] || { name: k, weight: 0, defaultCount: 0 }; return '<div class="bg-hm-surface rounded-lg px-4 py-3 flex flex-wrap items-center gap-4"><span class="text-xs font-600 text-hm-amber w-6">' + k.toUpperCase() + '</span><span class="text-xs text-hm-muted flex-1 min-w-[100px]">' + ev.name + '</span><div class="flex items-center gap-2"><label class="text-[9px] text-hm-muted">Weight(g)</label><input type="number" id="s-w-' + k + '" value="' + ev.weight + '" min="0" class="w-20 bg-hm-card border border-hm-border rounded-lg px-2 py-1.5 text-sm font-mono text-center text-hm-amber focus:outline-none focus:border-hm-amber/40"></div><div class="flex items-center gap-2"><label class="text-[9px] text-hm-muted">Default</label><input type="number" id="s-d-' + k + '" value="' + ev.defaultCount + '" min="0" class="w-16 bg-hm-card border border-hm-border rounded-lg px-2 py-1.5 text-sm font-mono text-center focus:outline-none focus:border-hm-amber/40"></div></div>'; }).join('') + '</div></div><div><div class="text-[9px] text-hm-muted uppercase tracking-[.15em] font-600 mb-2.5">Operator List</div><div id="oL" class="space-y-2">' + S.operators.map(function(o) { return '<div class="flex items-center gap-2"><input type="text" value="' + o + '" class="sop flex-1 bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40"><button onclick="this.parentElement.remove()" class="w-7 h-7 rounded-lg border border-hm-border hover:border-red-500/50 text-hm-muted hover:text-red-400 flex items-center justify-center transition-colors"><i class="fas fa-trash text-[10px]"></i></button></div>'; }).join('') + '</div><button onclick="addOp()" class="mt-2 text-[11px] text-hm-amber hover:underline"><i class="fas fa-plus mr-1"></i>Tambah Operator</button></div><div class="pt-2 border-t border-hm-border"><button onclick="rstAll()" class="px-4 py-2 rounded-lg border border-red-500/30 text-red-400 text-[11px] font-600 hover:bg-red-500/10 transition-colors"><i class="fas fa-triangle-exclamation mr-1.5"></i>Reset Semua Data ke Default</button></div>';
+  opM('mS');
+}
+function addOp() { var l = document.getElementById('oL'), d = document.createElement('div'); d.className = 'flex items-center gap-2'; d.innerHTML = '<input type="text" value="" placeholder="Nama baru" class="sop flex-1 bg-hm-surface border border-hm-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-hm-amber/40"><button onclick="this.parentElement.remove()" class="w-7 h-7 rounded-lg border border-hm-border hover:border-red-500/50 text-hm-muted hover:text-red-400 flex items-center justify-center transition-colors"><i class="fas fa-trash text-[10px]"></i></button>'; l.appendChild(d); }
+function svSet() {
+  var data = { weightPerPcs: parseInt(document.getElementById('s-wpp').value) || 48, events: {}, operators: [] };
+  EK.forEach(function(k) { data.events[k] = { name: (S.events[k] || {}).name || k, weight: Math.max(0, parseInt(document.getElementById('s-w-' + k).value) || 0), defaultCount: Math.max(0, parseInt(document.getElementById('s-d-' + k).value) || 0) }; });
+  document.querySelectorAll('.sop').forEach(function(inp) { var v = inp.value.trim(); if (v) data.operators.push(v.toUpperCase()); });
+  if (!data.operators.length) data.operators = ['AHMAD'];
+  bL('bSS', true);
+  apiPost('saveSettings', data).then(function(r) { bL('bSS', false); if (r.success) { S = data; rOpDD(); rCnt(); clM('mS'); toast('Settings disimpan ke Spreadsheet!', 'success'); } else { toast('Gagal: ' + (r.error || 'Unknown'), 'error'); } }).catch(function(e) { bL('bSS', false); toast('Ralat: ' + e.message, 'error'); });
+}
+function rstAll() { if (!confirm('Pasti mahu reset SEMUA data? Semua rekod LOG akan dipadam.')) return; bL('bSS', true); apiPost('resetAll', {}).then(function(r) { bL('bSS', false); if (r.success) { clM('mS'); loadApp(); } else { toast('Gagal', 'error'); } }).catch(function(e) { bL('bSS', false); toast('Ralat: ' + e.message, 'error'); }); }
+
+/* ================================================================
+   EVENTS
+   ================================================================ */
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') ['mV', 'mE', 'mS'].forEach(function(id) { clM(id); }); });
+['mV', 'mE', 'mS'].forEach(function(id) { document.getElementById(id).addEventListener('click', function(e) { if (e.target === this) clM(id); }); });
+
+/* ================================================================
+   INIT — check URL, then load data
+   ================================================================ */
+function loadApp() {
+  document.getElementById('ldTx').textContent = 'Initializing spreadsheet...';
+  apiGet('init').then(function() {
+    return apiGet('getSettings');
+  }).then(function(s) {
+    S = s; rOpDD(); setNow();
+    document.getElementById('ldTx').textContent = 'Loading log data...';
+    return apiGet('getLog');
+  }).then(function(log) {
+    LD = log;
+    if (log.length) { nId = Math.max.apply(null, log.map(function(e) { return e.id; })) + 1; } else { nId = 1; }
+    rCnt();
+    document.getElementById('ldOv').style.opacity = '0';
+    document.getElementById('ldOv').style.transition = 'opacity .4s';
+    setTimeout(function() { document.getElementById('ldOv').style.display = 'none'; }, 400);
+    document.getElementById('setupScreen').classList.add('hidden');
+    document.getElementById('mainApp').classList.remove('hidden');
+  }).catch(function(e) {
+    document.getElementById('ldTx').textContent = 'Error: ' + e.message;
+  });
+}
+
+function init() {
+  if (API_URL) {
+    loadApp();
+  } else {
+    document.getElementById('ldOv').style.display = 'none';
+    document.getElementById('setupScreen').classList.remove('hidden');
+    document.getElementById('setupScreen').style.display = 'flex';
+  }
+}
 init();
-<\/script>
-<\/body>
-<\/html>
-*/}
+</script>
+</body>
+</html>
